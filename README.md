@@ -1,4 +1,4 @@
 DockerApiProxy
 ==============
 
-** TODO: Add description **
+Proxies Docker API requests across multiple docker hosts.

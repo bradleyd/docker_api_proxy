@@ -20,16 +20,20 @@ defmodule DockerApiProxy.Server do
     send_resp(conn, 200, enc)
   end
 
+  ## TODO need to pattern match on insert as well
   post "/hosts" do
     host = conn.params[:data]["name"]
     # search ets for host, if not exist create new key
     token = UUID.uuid4()
-    IO.inspect  DockerApiProxy.Registry.lookup(:registry, host)
+    resp =
     case DockerApiProxy.Registry.lookup(:registry, host) do
-      {:ok, {^host, token}} -> {:ok, token}
-      :error -> DockerApiProxy.Registry.insert(:registry, {host, token})
+      {:ok, {^host, token}} -> 
+          token
+      :error -> 
+          DockerApiProxy.Registry.insert(:registry, {host, token})
+          token
     end
-    response = JSON.encode!(%{token: token})
+    response = JSON.encode!(%{token: resp})
     send_resp(conn, 201, response)
   end
 

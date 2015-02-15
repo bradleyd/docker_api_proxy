@@ -6,7 +6,9 @@ defmodule DockerApiProxy.Supervisor do
   end
 
   def init([]) do
-    children = []
+    children = [
+      worker(DockerApiProxy.Registry, [:registry])
+    ]
 
     supervise(children, strategy: :one_for_one)
   end

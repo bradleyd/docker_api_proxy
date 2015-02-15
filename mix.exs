@@ -29,6 +29,7 @@ defmodule DockerApiProxy.Mixfile do
       {:plug, "~> 0.9"},
       {:cowboy, "~> 1.0.0"},
       {:json,   "~> 0.3.0"},
+       { :uuid, "~> 0.1.5" },
       {:erldocker, github: "tsloughter/erldocker"}
     ]   
   end

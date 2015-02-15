@@ -1,6 +1,8 @@
 defmodule DockerApiProxy.Server do
   import Plug.Conn
   use Plug.Router
+
+  plug Plug.Parsers, parsers: [DockerApiProxy.Plugs.Parsers.JSON]
   plug :match
   plug :dispatch
     
@@ -16,6 +18,19 @@ defmodule DockerApiProxy.Server do
     hosts = ["192.168.4.4:14443", "127.0.0.1:14443"]
     {:ok, enc } = JSON.encode(hosts)
     send_resp(conn, 200, enc)
+  end
+
+  post "/hosts" do
+    host = conn.params[:data]["name"]
+    # search ets for host, if not exist create new key
+    token = UUID.uuid4()
+    IO.inspect  DockerApiProxy.Registry.lookup(:registry, host)
+    case DockerApiProxy.Registry.lookup(:registry, host) do
+      {:ok, {^host, token}} -> {:ok, token}
+      :error -> DockerApiProxy.Registry.insert(:registry, {host, token})
+    end
+    response = JSON.encode!(%{token: token})
+    send_resp(conn, 201, response)
   end
 
   get "/containers" do

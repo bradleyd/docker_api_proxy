@@ -10,6 +10,11 @@ defmodule DockerApiProxy.ServerTest do
   end
 
   test "returns all containers", %{pid: pid} do
+    body = %{name: "127.0.0.1:14443"}
+    conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn1 = DockerApiProxy.Server.call(conn1, [])
+
+
     conn = conn(:get, "/containers")
 
     conn = DockerApiProxy.Server.call(conn, [])
@@ -33,6 +38,24 @@ defmodule DockerApiProxy.ServerTest do
     assert {:ok, _} = decoded
   end 
 
+  test "returns all the docker hosts registered" do
+    body = %{name: "192.168.1.100"}
+    conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn1 = DockerApiProxy.Server.call(conn1, [])
+
+
+    conn = conn(:get, "/hosts")
+
+    conn = DockerApiProxy.Server.call(conn, [])
+
+    decoded = JSON.decode(conn.resp_body)
+    # Assert the response and status
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert {:ok, ["192.168.1.100"]} = decoded
+
+  end
+  
   test "new docker host register's and gets a token back" do
     body = %{name: "192.168.1.100"}
     conn = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])

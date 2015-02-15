@@ -15,8 +15,8 @@ defmodule DockerApiProxy.Server do
   end
 
   get "/hosts" do
-    hosts = ["192.168.4.4:14443", "127.0.0.1:14443"]
-    {:ok, enc } = JSON.encode(hosts)
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
+    enc = JSON.encode!(hosts)
     send_resp(conn, 200, enc)
   end
 
@@ -38,7 +38,7 @@ defmodule DockerApiProxy.Server do
   end
 
   get "/containers" do
-    hosts = ["192.168.4.4:14443", "127.0.0.1:14443"]
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(x) -> 
     Application.put_env(:erldocker, :docker_http, x)
     {:ok, result } = :docker_container.containers
@@ -50,7 +50,7 @@ defmodule DockerApiProxy.Server do
   end
 
   get "/container/:id" do
-    hosts = ["192.168.4.4:14443", "127.0.0.1:14443"]
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(x) -> 
       Application.put_env(:erldocker, :docker_http, x)
       case :docker_container.container(id) do
@@ -66,5 +66,4 @@ defmodule DockerApiProxy.Server do
   match _ do
     send_resp(conn, 404, "oops")
   end
-
 end

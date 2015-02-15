@@ -24,5 +24,23 @@ defmodule DockerApiProxy.Registry do
     end 
   end
   
-end
+  def keys(table) do
+   find(table, nil, []) 
+  end
+
+  defp find(_, :"$end_of_table", acc) do
+    {:ok, List.delete(acc, :"$end_of_table") |> Enum.sort}
+  end
+
+  defp find(table, nil, acc) do
+    next = :ets.first(table)
+    find(table, next, [next|acc])
+  end
+
+  defp find(table, thing, acc) do
+    next = :ets.next(table, thing)
+    find(table, next, [next|acc])
+  end
+
+  end
 

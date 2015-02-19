@@ -12,7 +12,7 @@ defmodule DockerApiProxy.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :cowboy, :plug, :erldocker]]
+    [applications: [:logger, :cowboy, :plug, :httpoison]]
   end
 
   # Dependencies can be Hex packages:
@@ -29,8 +29,8 @@ defmodule DockerApiProxy.Mixfile do
       {:plug, "~> 0.9"},
       {:cowboy, "~> 1.0.0"},
       {:json,   "~> 0.3.0"},
-       { :uuid, "~> 0.1.5" },
-      {:erldocker, github: "tsloughter/erldocker"}
+      {:uuid, "~> 0.1.5" },
+      {:docker_api, git: "https://github.com/bradleyd/docker_api.git"}
     ]   
   end
 end

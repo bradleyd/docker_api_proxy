@@ -39,28 +39,49 @@ defmodule DockerApiProxy.Server do
 
   get "/containers" do
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-    res = Enum.flat_map(hosts, fn(x) -> 
-    Application.put_env(:erldocker, :docker_http, x)
-    {:ok, result } = :docker_container.containers
-    result
+    res = Enum.flat_map(hosts, fn(host) -> 
+      {:ok, body, code} = DockerApi.Container.all(host)
+      body
     end)
 
     {:ok, enc } = JSON.encode(res)
     send_resp(conn, 200, enc)
   end
 
+  post "/containers" do
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
+    Application.put_env(:erldocker, :docker_http, List.first(hosts))
+    IO.inspect conn.params[:data]
+    payload = conn.params[:data]
+    #payload = %{ "HostName": "", "Image": "redis", "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
+                 #"PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
+    {:ok, result } = :docker_container.create(payload)
+    send_resp(conn, 200, JSON.encode!(result))
+  end
+
+  post "/container/:id/start" do
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
+    #Application.put_env(:erldocker, :docker_http, List.first(hosts))
+    payload = %{ "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
+    {:ok, body, code} = DockerApi.Container.start(List.first(hosts), id, payload)
+    send_resp(conn, code, JSON.encode!(body))
+  end
+
+  post "/container/:id/stop" do
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
+    {:ok, body, code } = DockerApi.Container.stop(List.first(hosts), id)
+    send_resp(conn, code, JSON.encode!(body))
+  end
+
   get "/container/:id" do
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(x) -> 
-      Application.put_env(:erldocker, :docker_http, x)
-      case :docker_container.container(id) do
-        {:ok, result } -> result
+      case DockerApi.Container.get(x, id) do
+        {:ok, body, code } -> body
         _ -> []
       end
     end)
-
-    {:ok, enc } = JSON.encode(res)
-    send_resp(conn, 200, enc)
+    send_resp(conn, 200, JSON.encode!(res))
   end
 
   match _ do

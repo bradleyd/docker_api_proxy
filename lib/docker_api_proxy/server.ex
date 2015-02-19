@@ -48,21 +48,23 @@ defmodule DockerApiProxy.Server do
     send_resp(conn, 200, enc)
   end
 
+  """ 
+  Example params
+      %{ "HostName": "", "Image": "redis", "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
+         "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
+  """
   post "/containers" do
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-    Application.put_env(:erldocker, :docker_http, List.first(hosts))
     IO.inspect conn.params[:data]
     payload = conn.params[:data]
-    #payload = %{ "HostName": "", "Image": "redis", "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
-                 #"PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
-    {:ok, result } = :docker_container.create(payload)
-    send_resp(conn, 200, JSON.encode!(result))
+    {:ok, body, code } = DockerApi.Container.create(List.first(hosts), payload)
+    send_resp(conn, 200, JSON.encode!(body))
   end
 
+  ## TODO need algorithm to choose the correct docker host least first, round robin
   post "/container/:id/start" do
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-    #Application.put_env(:erldocker, :docker_http, List.first(hosts))
-    payload = %{ "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
+    payload = conn.params[:data]
     {:ok, body, code} = DockerApi.Container.start(List.first(hosts), id, payload)
     send_resp(conn, code, JSON.encode!(body))
   end

@@ -62,9 +62,8 @@ defmodule DockerApiProxy.ServerTest do
 
     conn = DockerApiProxy.Server.call(conn, [])
 
-    {:ok, id } = JSON.decode(conn.resp_body)
-    IO.inspect id
-    conn = conn(:post, "/container/#{id}/start", JSON.encode!(%{}), headers: [{"content-type", "application/json"}])
+    {:ok, results } = JSON.decode(conn.resp_body)
+    conn = conn(:post, "/container/#{results["Id"]}/start", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn = DockerApiProxy.Server.call(conn, [])
     response = JSON.decode(conn.resp_body)
     IO.inspect response

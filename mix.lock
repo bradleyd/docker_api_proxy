@@ -1,7 +1,7 @@
 %{"active": {:git, "https://github.com/proger/active", "8a8d2da6b309bbeae96adf45ab1d696172cde3aa", [ref: "HEAD"]},
   "cowboy": {:hex, :cowboy, "1.0.0"},
   "cowlib": {:hex, :cowlib, "1.0.1"},
-  "docker_api": {:git, "https://github.com/bradleyd/docker_api.git", "378a977c783aabd35a174a6008f809406b9b41db", []},
+  "docker_api": {:git, "https://github.com/bradleyd/docker_api.git", "f6775d4c56428fb1a8da67842cdea626e480c69d", []},
   "erldocker": {:git, "https://github.com/Forkk/erldocker.git", "8b3986dac6f0e1629f71b87c38103703798e0348", []},
   "erlfsmon": {:git, "git://github.com/proger/erlfsmon", "12759ab5e531d89768e14078f130daf9e5969749", [ref: "HEAD"]},
   "erlsh": {:git, "https://github.com/proger/erlsh", "a476e9291e27b2bf2712a7f7b6aaaef595403d15", [ref: "HEAD"]},

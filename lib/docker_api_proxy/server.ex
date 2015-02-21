@@ -40,8 +40,10 @@ defmodule DockerApiProxy.Server do
   get "/containers" do
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(host) -> 
-      {:ok, body, code} = DockerApi.Container.all(host)
-      body
+      case DockerApi.Container.all(host) do
+        {:ok, body, code} -> body
+        _ -> []
+      end
     end)
 
     {:ok, enc } = JSON.encode(res)
@@ -55,7 +57,6 @@ defmodule DockerApiProxy.Server do
   """
   post "/containers" do
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-    IO.inspect conn.params[:data]
     payload = conn.params[:data]
     {:ok, body, code } = DockerApi.Container.create(List.first(hosts), payload)
     send_resp(conn, 200, JSON.encode!(body))

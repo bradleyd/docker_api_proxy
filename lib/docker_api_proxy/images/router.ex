@@ -3,6 +3,7 @@ defmodule DockerApiProxy.Images.Router do
   import Plug.Conn
   use Plug.Router
 
+  plug Plug.Parsers, parsers: [:urlencoded, :multipart]
   plug Plug.Parsers, parsers: [DockerApiProxy.Plugs.Parsers.JSON]
   plug :match
   plug :dispatch

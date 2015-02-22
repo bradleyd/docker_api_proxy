@@ -1,6 +1,6 @@
 defmodule DockerApiProxy.Router do
-  import Plug.Conn
   use Plug.Router
+  import Plug.Conn
 
   plug Plug.Logger
   plug :match
@@ -16,6 +16,10 @@ defmodule DockerApiProxy.Router do
 
   get "/hello" do
     send_resp(conn, 200, "\nworld")
+  end
+
+  match _ do
+    send_resp(conn, 404, "oops")
   end
 
 end

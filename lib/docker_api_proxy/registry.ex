@@ -2,10 +2,10 @@ defmodule DockerApiProxy.Registry do
   use GenServer
   
   def start_link(table, opts \\ []) do
-   GenServer.start_link(__MODULE__, {table}, opts) 
+   GenServer.start_link(__MODULE__, table, opts) 
   end
   
-  def init({table}) do
+  def init(table) do
     ets  = :ets.new(table, [:bag, :public, :named_table, read_concurrency: true])
     {:ok, %{names: ets}}
   end

@@ -12,9 +12,8 @@ defmodule DockerApiProxy.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger, :cowboy, :plug, :docker_api],
-     mod: {DockerApiProxy, []}
-   ]
+    [applications: [:logger, :cowboy, :plug, :docker_api]]
+      #mod: {DockerApiProxy, [:registry]}]
   end
 
   # Dependencies can be Hex packages:

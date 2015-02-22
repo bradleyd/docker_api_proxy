@@ -14,7 +14,7 @@ defmodule DockerApiProxy do
     #File.mkdir_p!("tmp")
 
     Logger.info "Starting Cowboy on port #{opts[:port]}"
-    Plug.Adapters.Cowboy.http(DockerApiProxy.Server, [], opts)
+    Plug.Adapters.Cowboy.http(DockerApiProxy.Router, [], opts)
     DockerApiProxy.Supervisor.start_link
   end
 end

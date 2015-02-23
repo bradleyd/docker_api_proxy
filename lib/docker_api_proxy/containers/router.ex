@@ -26,9 +26,12 @@ defmodule DockerApiProxy.Containers.Router do
   end
 
   """ 
-  Example params
-      %{ "HostName": "", "Image": "redis", "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
-         "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
+  Create a container
+
+  Example params:
+      `%{ "HostName": "", "Image": "redis", "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
+         "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}`
+
   """
   post "/" do
     payload = conn.params[:data]
@@ -54,20 +57,34 @@ defmodule DockerApiProxy.Containers.Router do
     send_resp(conn, code, JSON.encode!(body))
   end
 
+  @doc """
+    Fetch a container
+
+    id: container id
+
+    * This searches all docker hosts in the registry
+
+  """
   get ":id" do
     Logger.info("Request for container: #{id}")
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-    res = Enum.flat_map(hosts, fn(x) -> 
-      case DockerApi.Container.find(x, id) do
-        {:ok, body, 404 } ->  [body]
-        {:ok, body, code } -> body
-        _ -> []
-      end
-    end)
-    send_resp(conn, 200, JSON.encode!(res))
+    case DockerApi.Container.find(hosts, id) do
+      {:ok, body, 200 } when is_map(body) ->
+           send_response(conn, 200, body)
+      _ -> send_response(conn, 404, %{data: "not found"})
+    end
   end
 
   match _ do
-    send_resp(conn, 404, "oops")
+    send_resp(conn, 404, "No route in /containers")
   end
+
+  defp send_response(conn, 200, payload) do
+    send_resp(conn, 200, JSON.encode!(payload))
+  end
+
+  defp send_response(conn, 404, payload) do
+    send_resp(conn, 200, JSON.encode!(payload))
+  end
+
 end

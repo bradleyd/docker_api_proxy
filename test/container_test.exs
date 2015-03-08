@@ -5,13 +5,41 @@ defmodule DockerApiProxy.ContainerTest do
   @opts DockerApiProxy.Router.init([])
 
   @host "192.168.4.4:14443"
-  @cid "971f52624eb3"
+  @cid "86fda78c440e"
 
   setup do
     {:ok, pid} = DockerApiProxy.Supervisor.start_link
     {:ok, pid: pid}
   end
 
+  test "foobar" do
+    body = %{name: "127.0.0.1:14443"}
+    conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn1 = DockerApiProxy.Router.call(conn1, [])
+
+
+    conn = conn(:get, "/containers/test/#{@cid}")
+
+    conn = DockerApiProxy.Router.call(conn, [])
+
+    decoded = JSON.decode(conn.resp_body)
+    IO.inspect decoded
+  end
+ 
+  test "top for a container" do
+    body = %{name: "127.0.0.1:14443"}
+    conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn1 = DockerApiProxy.Router.call(conn1, [])
+
+
+    conn = conn(:get, "/containers/#{@cid}/top")
+
+    conn = DockerApiProxy.Router.call(conn, [])
+
+    decoded = JSON.decode(conn.resp_body)
+    IO.inspect decoded
+  end
+ 
   test "returns all containers", %{pid: pid} do
     body = %{name: "127.0.0.1:14443"}
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
@@ -23,6 +51,24 @@ defmodule DockerApiProxy.ContainerTest do
     conn = DockerApiProxy.Router.call(conn, [])
 
     decoded = JSON.decode(conn.resp_body)
+    IO.inspect decoded
+    # Assert the response and status
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert {:ok, _} = decoded
+  end 
+
+  test "returns logs for a specfic container" do
+    body = %{name: @host}
+    conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn1 = DockerApiProxy.Router.call(conn1, [])
+
+    conn = conn(:get, "/containers/#{@cid}/logs")
+
+    conn = DockerApiProxy.Router.call(conn, [])
+
+    decoded = JSON.decode(conn.resp_body)
+    IO.inspect decoded
     # Assert the response and status
     assert conn.state == :sent
     assert conn.status == 200
@@ -63,7 +109,7 @@ defmodule DockerApiProxy.ContainerTest do
     conn = DockerApiProxy.Router.call(conn, [])
 
     {:ok, results } = JSON.decode(conn.resp_body)
-    conn = conn(:post, "/container/#{results["Id"]}/start", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/containers/#{results["Id"]}/start", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn = DockerApiProxy.Router.call(conn, [])
     response = JSON.decode(conn.resp_body)
     IO.inspect response
@@ -80,11 +126,11 @@ defmodule DockerApiProxy.ContainerTest do
                "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], 
                                   "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
 
-    conn = conn(:post, "/container/#{@cid}/start", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn2 = conn(:post, "/containers/b4610c17cb09/start", JSON.encode!(body), headers: [{"content-type", "application/json"}])
 
-    conn = DockerApiProxy.Router.call(conn, [])
+    conn2 = DockerApiProxy.Router.call(conn2, [])
 
-    response = JSON.decode(conn.resp_body)
+    response = JSON.decode(conn2.resp_body)
     IO.inspect response
   end 
 
@@ -93,19 +139,7 @@ defmodule DockerApiProxy.ContainerTest do
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
 
-    #body  = %{ "Image": "redis",
-               #"HostName": "foobar",
-               #"ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
-               #"PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], 
-                                  #"6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
-
-    #conn = conn(:post, "/container/#{@cid}/start", JSON.encode!(body), headers: [{"content-type", "application/json"}])
-
-    #conn = DockerApiProxy.Router.call(conn, [])
-
-    #response = JSON.decode(conn.resp_body)
-    #IO.inspect response
-    conn = conn(:post, "/container/#{@cid}/stop")
+    conn = conn(:post, "/containers/b4610c17cb09/stop")
 
     conn = DockerApiProxy.Router.call(conn, [])
 

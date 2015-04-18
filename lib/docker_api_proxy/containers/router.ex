@@ -146,8 +146,10 @@ defmodule DockerApiProxy.Containers.Router do
     case func.(h, id) do
         {:ok, body} when is_list(body) ->
           search_hosts([], func, id, body)
-        {:ok, body, code} when is_map(body) or is_list(body) ->
+        {:ok, body, code} when is_map(body) ->
           search_hosts([], func, id, Map.merge(body, %{"DockerHost" => h}))
+        {:ok, body, code} when is_list(body) ->
+          search_hosts([], func, id, Enum.map(body, fn(container) -> Map.merge(container, %{"DockerHost" => h}) end))
         _ -> search_hosts(t, func, id, acc)
     end
   end

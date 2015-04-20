@@ -28,6 +28,7 @@ defmodule DockerApiProxy.Containers.Router do
          "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}`
 
   """
+  # TODO merge PortBindings with docker host ip minus the port
   post "/" do
     payload = conn.params[:data]
     Logger.info("Request to create container")

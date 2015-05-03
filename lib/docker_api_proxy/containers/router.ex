@@ -123,12 +123,25 @@ defmodule DockerApiProxy.Containers.Router do
     id: container id
 
   """
+  ### had to switch to which_host because when container does not exist search_hosts catches on first return which
+  ### maybe {:ok, ["No such container: 1234\n"]} thus not displaying the logs
+  ### Host will come back nil if container is not found and bad things happen
   get ":id/logs" do
     Logger.info("Request logs for container: #{id}")
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-    logs = fn(host, iid) -> DockerApi.Container.logs(host, iid) end
-    results = search_hosts(hosts, logs, id, [])
-    send_response(conn, 200, results)
+    #logs = fn(host, iid) -> DockerApi.Container.logs(host, iid) end
+    #results = search_hosts(hosts, logs, id, [])
+    #send_response(conn, 200, results)
+    host = which_host(hosts, id, nil)
+    if host == nil do
+      send_response(conn, 404, %{})
+    end
+    case DockerApi.Container.logs(host, id) do
+      {:ok, body } ->
+        send_response(conn, 200, body)
+      _ -> 
+        send_response(conn, 404, %{})
+    end
   end
 
   get "test/:id" do

@@ -63,7 +63,7 @@ defmodule DockerApiProxy.ContainerTest do
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
 
-    conn = conn(:get, "/containers/#{@cid}/logs")
+    conn = conn(:get, "/containers/c7a7/logs")
 
     conn = DockerApiProxy.Router.call(conn, [])
 

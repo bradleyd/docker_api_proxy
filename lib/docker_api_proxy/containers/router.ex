@@ -191,7 +191,7 @@ defmodule DockerApiProxy.Containers.Router do
     send_resp(conn, 500, "something went terribly wrong")
   end
 
-  defp all_containers([], acc), do: acc
+  defp all_containers([], acc), do: List.flatten(acc)
   defp all_containers([h|t], acc) do
     case DockerApi.Container.all(h, %{all: 0}) do
       {:ok, body, code} when is_list(body) ->

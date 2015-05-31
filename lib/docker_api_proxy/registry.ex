@@ -6,7 +6,7 @@ defmodule DockerApiProxy.Registry do
   end
 
   def init(table) do
-    ets  = :ets.new(table, [:bag, :public, :named_table, read_concurrency: true])
+    ets  = :ets.new(table, [:set, :public, :named_table, read_concurrency: true])
     {:ok, %{names: ets}}
   end
 
@@ -19,7 +19,7 @@ defmodule DockerApiProxy.Registry do
 
   def lookup(table, key) do
     case :ets.lookup(table, key) do
-      [{^key, token}] -> {:ok, {key, token}}
+      [{^key, token, heartbeat, timestamp}] -> {:ok, {key, token, heartbeat, timestamp}}
       [] -> :error
     end 
   end

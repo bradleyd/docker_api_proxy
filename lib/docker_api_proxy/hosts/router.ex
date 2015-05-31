@@ -20,18 +20,23 @@ defmodule DockerApiProxy.Hosts.Router do
   ## TODO need to pattern match on insert as well
   post "/" do
     host = conn.params[:data]["name"]
+    heartbeat = conn.params[:data]["heartbeat_interval"]
+
     Logger.info("Got registration from #{host}")
     # search ets for host, if not exist create new key
     token = UUID.uuid4()
     resp =
     case DockerApiProxy.Registry.lookup(:registry, host) do
-      {:ok, {^host, token}} -> 
-          token
+      {:ok, {^host, token, hb, timestamp}} -> 
+          timestamp = :calendar.local_time
+          DockerApiProxy.Registry.insert(:registry, {host, token, heartbeat, timestamp})
+          %{token: token, heartbeat: heartbeat, last_registered: timestamp}
       :error -> 
-          DockerApiProxy.Registry.insert(:registry, {host, token})
-          token
+          timestamp = :calendar.local_time
+          DockerApiProxy.Registry.insert(:registry, {host, token, heartbeat, timestamp})
+          %{token: token, heartbeat: heartbeat, last_registered: timestamp}
     end
-    response = JSON.encode!(%{token: resp})
+    response = JSON.encode!(resp)
     send_resp(conn, 201, response)
   end
 

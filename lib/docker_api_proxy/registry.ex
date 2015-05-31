@@ -1,10 +1,10 @@
 defmodule DockerApiProxy.Registry do
   use GenServer
-  
+
   def start_link(table, opts \\ []) do
-   GenServer.start_link(__MODULE__, table, opts) 
+    GenServer.start_link(__MODULE__, table, opts) 
   end
-  
+
   def init(table) do
     ets  = :ets.new(table, [:bag, :public, :named_table, read_concurrency: true])
     {:ok, %{names: ets}}
@@ -16,16 +16,16 @@ defmodule DockerApiProxy.Registry do
       _ -> {:error}
     end 
   end
-  
+
   def lookup(table, key) do
     case :ets.lookup(table, key) do
       [{^key, token}] -> {:ok, {key, token}}
       [] -> :error
     end 
   end
-  
+
   def keys(table) do
-   find(table, nil, []) 
+    find(table, nil, []) 
   end
 
   defp find(_, :"$end_of_table", acc) do
@@ -42,5 +42,4 @@ defmodule DockerApiProxy.Registry do
     find(table, next, [next|acc])
   end
 
-  end
-
+end

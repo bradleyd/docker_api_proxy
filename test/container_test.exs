@@ -41,9 +41,12 @@ defmodule DockerApiProxy.ContainerTest do
   end
  
   test "returns all containers", %{pid: pid} do
-    body = %{name: "127.0.0.1:14443"}
+    body = %{name: "192.168.4.4:14443"}
+    body1 = %{name: "127.0.0.1:14443"}
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn2 = conn(:post, "/hosts", JSON.encode!(body1), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
+    conn2 = DockerApiProxy.Router.call(conn2, [])
 
 
     conn = conn(:get, "/containers")

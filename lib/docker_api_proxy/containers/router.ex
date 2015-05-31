@@ -14,9 +14,7 @@ defmodule DockerApiProxy.Containers.Router do
   get "/" do
     Logger.info("Request for all containers")
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-
-    all = fn(host, _id) -> DockerApi.Container.all(host) end
-    results = search_hosts(hosts, all, nil, [])
+    results = all_containers(hosts, [])
     send_response(conn, 200, results)
   end
 
@@ -193,6 +191,16 @@ defmodule DockerApiProxy.Containers.Router do
     send_resp(conn, 500, "something went terribly wrong")
   end
 
+  defp all_containers([], acc), do: acc
+  defp all_containers([h|t], acc) do
+    case DockerApi.Container.all(h, %{all: 0}) do
+      {:ok, body, code} when is_list(body) ->
+          with_docker_host = Enum.map(body, fn(container) -> Map.merge(container, %{"DockerHost" => h}) end)
+          all_containers(t, [with_docker_host|acc])
+      _ -> all_containers(t, acc)
+    end
+  end
+  
 
   defp which_host([], id, acc), do: acc
   defp which_host([h|t], id, acc) do

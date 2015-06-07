@@ -52,12 +52,7 @@ defmodule DockerApiProxy.ImageTest do
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
 
-    body  = %{ "Image": "redis",
-               "HostName": "foobar",
-               "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
-               "PortBindings": %{ "22/tcp": [%{ "HostIp": "192.168.4.4" }], 
-                                  "6379/tcp": [%{ "HostIp": "192.168.4.4" }]}}
-
+    body  = %{ "fromImage": "127.0.0.1:5000/redis:latest" }
     conn = conn(:post, "/images", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn = DockerApiProxy.Router.call(conn, [])
     {:ok, results } = JSON.decode(conn.resp_body)

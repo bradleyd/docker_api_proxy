@@ -19,7 +19,7 @@ defmodule DockerApiProxy.Registry do
 
   def lookup(table, key) do
     case :ets.lookup(table, key) do
-      [{^key, token, heartbeat, timestamp}] -> {:ok, {key, token, heartbeat, timestamp}}
+      [{^key, struct}] -> {:ok, {key, struct}}
       [] -> :error
     end 
   end

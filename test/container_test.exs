@@ -96,12 +96,13 @@ defmodule DockerApiProxy.ContainerTest do
     assert {:ok, _} = decoded
   end 
 
+  # If you are creating from a image in repo then you must create image first then create container then start ;(
   test "creates a container" do
     body = %{name: "192.168.4.4:14443"}
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
 
-    body  = %{ "Image": "redis",
+    body  = %{ "Image": "127.0.0.1:5000/redis:latest",
                "HostName": "foobar",
                "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
                "PortBindings": %{ "22/tcp": [%{}], 

@@ -3,11 +3,10 @@ defmodule DockerApiProxy.Images.Router do
   import Plug.Conn
   use Plug.Router
 
-  plug Plug.Parsers, parsers: [:urlencoded, :multipart]
   plug Plug.Parsers, parsers: [DockerApiProxy.Plugs.Parsers.JSON]
   plug :match
   plug :dispatch
-    
+
   def init(options) do
     options
   end
@@ -26,13 +25,27 @@ defmodule DockerApiProxy.Images.Router do
     send_resp(conn, 200, JSON.encode!(body))
   end
 
+  post "/" do
+    IO.inspect conn.params
+    payload = conn.params[:data]
+    opts = conn.params[:data]
+    Logger.info("Request to create image: #{inspect(payload)}")
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
+    results = round_robin_hosts(hosts)
+    case DockerApi.Image.create(results.host, opts) do
+      {:ok, body } ->
+        send_resp(conn, 200, JSON.encode!(body))
+        _ -> send_resp(conn, 500, %{data: "something went wrong"})
+    end
+  end
+
   get "/" do
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(host) -> 
-      case DockerApi.Image.all(host) do
-        {:ok, body, code} -> body
-        _ -> []
-      end
+    case DockerApi.Image.all(host) do
+      {:ok, body, code} -> body
+      _ -> []
+    end
     end)
 
     {:ok, enc } = JSON.encode(res)
@@ -43,11 +56,11 @@ defmodule DockerApiProxy.Images.Router do
     Logger.info("Request for image: #{id}")
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(x) -> 
-      case DockerApi.Image.find(x, id) do
-        {:ok, body, 404 } ->  [body]
-        {:ok, body, code } -> body
-        _ -> []
-      end
+    case DockerApi.Image.find(x, id) do
+      {:ok, body, 404 } ->  [body]
+      {:ok, body, code } -> body
+      _ -> []
+    end
     end)
 
     send_resp(conn, 200, JSON.encode!(res))
@@ -57,11 +70,11 @@ defmodule DockerApiProxy.Images.Router do
     Logger.info("Request for image: #{id}")
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(x) -> 
-      case DockerApi.Image.history(x, id) do
-        {:ok, body, 404 } ->  [body]
-        {:ok, body, code } -> body
-        _ -> []
-      end
+    case DockerApi.Image.history(x, id) do
+      {:ok, body, 404 } ->  [body]
+      {:ok, body, code } -> body
+      _ -> []
+    end
     end)
 
     send_resp(conn, 200, JSON.encode!(res))
@@ -72,11 +85,11 @@ defmodule DockerApiProxy.Images.Router do
     Logger.info("Request to delete image: #{id} with #{query_params}")
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
     res = Enum.flat_map(hosts, fn(x) -> 
-      case DockerApi.Image.history(x, id) do
-        {:ok, body, 404 } ->  [body]
-        {:ok, body, code } -> body
-        _ -> []
-      end
+    case DockerApi.Image.history(x, id) do
+      {:ok, body, 404 } ->  [body]
+      {:ok, body, code } -> body
+      _ -> []
+    end
     end)
 
     send_resp(conn, 200, JSON.encode!(res))
@@ -84,6 +97,14 @@ defmodule DockerApiProxy.Images.Router do
 
   match _ do
     send_resp(conn, 404, "oops")
+  end
+
+  defp round_robin_hosts(hosts) when is_list(hosts) do
+    Enum.map(hosts, fn(h) ->                  
+    {:ok, body, code} = DockerApi.Container.all(h)
+    %{host: h, count: Enum.count(body)}
+    end) |> 
+    Enum.min_by(fn(x) -> x.count end)
   end
 
 end

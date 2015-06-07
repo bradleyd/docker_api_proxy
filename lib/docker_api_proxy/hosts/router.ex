@@ -7,6 +7,10 @@ defmodule DockerApiProxy.Hosts.Router do
   plug :match
   plug :dispatch
     
+  defmodule Host do
+    defstruct [:token, :heartbeat, :timestamp]
+  end
+
   def init(options) do
     options
   end
@@ -27,13 +31,13 @@ defmodule DockerApiProxy.Hosts.Router do
     token = UUID.uuid4()
     resp =
     case DockerApiProxy.Registry.lookup(:registry, host) do
-      {:ok, {^host, token, hb, timestamp}} -> 
+      {:ok, {^host, struct}} -> 
           timestamp = :calendar.local_time
-          DockerApiProxy.Registry.insert(:registry, {host, token, heartbeat, timestamp})
+          DockerApiProxy.Registry.insert(:registry, {host, %Host{token: token, heartbeat: heartbeat, timestamp: timestamp}})
           %{token: token, heartbeat: heartbeat, last_registered: timestamp}
       :error -> 
           timestamp = :calendar.local_time
-          DockerApiProxy.Registry.insert(:registry, {host, token, heartbeat, timestamp})
+          DockerApiProxy.Registry.insert(:registry, {host, %Host{token: token, heartbeat: heartbeat, timestamp: timestamp}})
           %{token: token, heartbeat: heartbeat, last_registered: timestamp}
     end
     response = JSON.encode!(resp)

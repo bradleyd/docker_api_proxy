@@ -76,7 +76,7 @@ defmodule DockerApiProxy.Hosts.Router do
 
   defp find_host_with_least_containers(hosts) when is_list(hosts) do
     Enum.map(hosts, fn(h) ->
-      {:ok, body, code} = DockerApi.Container.all(h)
+      {:ok, body, code} = DockerApi.Container.all(h, %{all: 0})
       %{host: h, count: Enum.count(body)}
     end) |>
     Enum.min_by(fn(x) -> x.count end)

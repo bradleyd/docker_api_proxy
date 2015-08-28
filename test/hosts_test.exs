@@ -10,7 +10,7 @@ defmodule DockerApiProxy.HostTest do
   end
 
   test "returns all the docker hosts registered" do
-    body = %{name: "192.168.1.100"}
+    body = %{name: "192.168.1.100", heartbeat_interval: 6000}
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
 
@@ -28,7 +28,7 @@ defmodule DockerApiProxy.HostTest do
   end
   
   test "new docker host register's and gets a token back" do
-    body = %{name: "192.168.1.100"}
+    body = %{name: "192.168.4.4", heartbeat_interval: 6000}
     conn = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn = DockerApiProxy.Router.call(conn, [])
 
@@ -39,12 +39,27 @@ defmodule DockerApiProxy.HostTest do
     assert {:ok, %{"token" => _token }} = decoded
   end
 
+  test "get least count on docker hosts" do
+    body = %{name: "192.168.4.4:14443", heartbeat_interval: 6000}
+    conn = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
+    conn = DockerApiProxy.Router.call(conn, [])
+
+    conn = conn(:get, "/hosts/least_count", %{}, headers: [{"content-type", "application/json"}])
+
+    conn = DockerApiProxy.Router.call(conn, [])
+
+    decoded = JSON.decode(conn.resp_body)
+    IO.inspect decoded
+    #conn2 = conn(:get, "/hosts/least_count", %{}, headers: [{"content-type", "application/json"}])
+    #conn2 = DockerApiProxy.Router.call(conn2, [])
+  end
+
   test "already registered docker host tries to register again" do
-    body = %{name: "192.168.1.100"}
+    body = %{name: "192.168.1.100", heartbeat_interval: 6000}
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
 
-    body = %{name: "192.168.1.100"}
+    body = %{name: "192.168.1.100", heartbeat_interval: 6000}
     conn2 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn2 = DockerApiProxy.Router.call(conn2, [])
 

@@ -47,7 +47,7 @@ defmodule DockerApiProxy.HostWatcher do
     {:ok, result}
   end
   defp missing_heartbeat?(table, min, ip) when min < 1 do
-    {:noreply, false}
+    {:noreply, table}
   end
 
 end

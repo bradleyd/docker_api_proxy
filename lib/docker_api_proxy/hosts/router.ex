@@ -44,11 +44,19 @@ defmodule DockerApiProxy.Hosts.Router do
     send_resp(conn, 201, response)
   end
 
-  get "/least_count" do
-    Logger.info("Find host with space")
+  get "/next_available" do
+    Logger.info("Find next host with space")
     {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
-    results  = round_robin_hosts(hosts)
-    response = JSON.encode!(%{host: results.host})
+    results  = find_host_with_least_containers(hosts)
+    response = JSON.encode!(results)
+    send_resp(conn, 201, response)
+  end
+
+  get "/sorted_least_count" do
+    Logger.info("Find all hosts with space sorted")
+    {:ok, hosts} = DockerApiProxy.Registry.keys(:registry)
+    results  = hosts_sorted_by_least_container_count(hosts)
+    response = JSON.encode!(results)
     send_resp(conn, 201, response)
   end
 
@@ -57,12 +65,20 @@ defmodule DockerApiProxy.Hosts.Router do
   end
 
 
-  defp round_robin_hosts(hosts) when is_list(hosts) do
+  defp hosts_sorted_by_least_container_count(hosts) when is_list(hosts) do
+    Enum.map(hosts, fn(h) ->
+      {:ok, body, code} = DockerApi.Container.all(h, %{all: 0})
+      %{host: h, count: Enum.count(body)}
+    end)
+    |> Enum.sort_by(fn(x) -> x.count end)
+    |> Enum.map(fn (x) -> x.host end)
+  end
+
+  defp find_host_with_least_containers(hosts) when is_list(hosts) do
     Enum.map(hosts, fn(h) ->
       {:ok, body, code} = DockerApi.Container.all(h)
       %{host: h, count: Enum.count(body)}
     end) |>
     Enum.min_by(fn(x) -> x.count end)
   end
-
 end

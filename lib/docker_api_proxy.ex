@@ -3,7 +3,7 @@ require Logger
 defmodule DockerApiProxy do
   use Application 
 
-  def start(_type, _args) do
+  def start() do
     opts  = [port: 4000, ip: {127,0,0,0}, compress: true, linger: {true, 10}]
 
     if port = System.get_env("DOCKER_PROXY_PORT") do

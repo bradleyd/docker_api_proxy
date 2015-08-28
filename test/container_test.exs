@@ -102,8 +102,9 @@ defmodule DockerApiProxy.ContainerTest do
     conn1 = conn(:post, "/hosts", JSON.encode!(body), headers: [{"content-type", "application/json"}])
     conn1 = DockerApiProxy.Router.call(conn1, [])
 
-    body  = %{ "Image": "127.0.0.1:5000/redis:latest",
+    body  = %{ "Image": "redis",
                "HostName": "foobar",
+               "Labels": %{ "account": "123456" },
                "ExposedPorts": %{ "22/tcp": %{}, "6379/tcp": %{} },
                "PortBindings": %{ "22/tcp": [%{}], 
                                   "6379/tcp": [%{}]}}

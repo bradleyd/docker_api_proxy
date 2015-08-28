@@ -3,7 +3,7 @@ defmodule DockerApiProxy.Mixfile do
 
   def project do
     [app: :docker_api_proxy,
-     version: "0.1.0",
+     version: "0.2.0",
      elixir: "~> 1.0",
      deps: deps]
   end
@@ -28,10 +28,11 @@ defmodule DockerApiProxy.Mixfile do
   defp deps do
     [
       {:plug, "~> 0.9"},
-      {:exrm, "~> 0.15.3"},
+      {:exrm, "~> 0.19.2"},
       {:cowboy, "~> 1.0.0"},
       {:json,   "~> 0.3.0"},
-      {:uuid, "~> 0.1.5" },
+      {:uuid, "~> 1.0.0" },
+      {:exprof, "~> 0.2" },
       {:docker_api, git: "https://github.com/bradleyd/docker_api.git"}
     ]   
   end

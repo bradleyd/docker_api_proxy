@@ -3,6 +3,10 @@ require Logger
 defmodule DockerApiProxy do
   use Application 
 
+  def start(_,_) do
+    start 
+  end
+  
   def start() do
     opts  = [port: 4000, ip: {127,0,0,0}, compress: true, linger: {true, 10}]
 

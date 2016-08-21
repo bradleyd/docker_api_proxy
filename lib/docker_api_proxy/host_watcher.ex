@@ -16,16 +16,16 @@ defmodule DockerApiProxy.HostWatcher do
     {:ok, table} 
   end
   
-  #TODO add logger
   def handle_info(:search, state) do
    all = :ets.select(state, [{{:"$1",:"$2"},[],[:"$$"]}])
    IO.inspect all
    Enum.each(all, fn(host) -> 
      [ip, meta] = host
-     {_, {_, min, sec}} = :calendar.time_difference(meta.timestamp, :erlang.localtime)
+     {_, {_, min, _sec}} = :calendar.time_difference(meta.timestamp, :erlang.localtime)
      GenServer.cast(__MODULE__, {:missing_heartbeat, min, ip})
    end)
    :erlang.send_after(@heartbeat_interval, self(), :search) 
+   #:erlang.garbage_collect(self())
    {:noreply, state}
   end
 
@@ -38,7 +38,11 @@ defmodule DockerApiProxy.HostWatcher do
     missing_heartbeat?(state, min, ip) 
     {:noreply, state} 
   end
-  
+ 
+  def handle_cast(_, state) do
+    {:noreply, state} 
+  end
+ 
   # TODO calculate the missing time according to heartbeat interval
   # (heartbeat_interval + padding) > sec ?
   defp missing_heartbeat?(table, min, ip) when min >= 1 do

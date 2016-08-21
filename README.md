@@ -7,6 +7,10 @@ DockerApiProxy has a few environment variables you can set:
 `DOCKER_PROXY_INTERFACE`
 `DOCKER_PROXY_PORT`
 
+```
+DOCKER_PROXY_INTERFACE=192.168.4.4 iex -S mix
+```
+
 ### Creating Image (Existing)
 You can create an image from local repo or remote
 ```bash

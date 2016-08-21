@@ -25,15 +25,18 @@ defmodule DockerApiProxy.Mixfile do
   #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
   #
   # Type `mix help deps` for more examples and options
+      #{:docker_api, git: "https://github.com/bradleyd/docker_api.git"}
   defp deps do
     [
-      {:plug, "~> 0.9"},
-      {:exrm, "~> 0.19.2"},
-      {:cowboy, "~> 1.0.0"},
+       {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2.2"},
+      {:plug, "~> 1.0"},
+      {:exrm, "~> 1.0"},
+      {:cowboy, "~> 1.0"},
       {:json,   "~> 0.3.0"},
-      {:uuid, "~> 1.0.0" },
+      {:uuid, "~> 1.0" },
       {:exprof, "~> 0.2" },
-      {:docker_api, git: "https://github.com/bradleyd/docker_api.git"}
+      {:rebar3_hex, "~> 2.5"},
+      {:docker_api, path: "/home/bradleyd/Projects/docker_api"}
     ]   
   end
 end

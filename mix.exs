@@ -28,7 +28,7 @@ defmodule DockerApiProxy.Mixfile do
       #{:docker_api, git: "https://github.com/bradleyd/docker_api.git"}
   defp deps do
     [
-       {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2.2"},
+      {:ibrowse, "~> 4.2"},
       {:plug, "~> 1.0"},
       {:exrm, "~> 1.0"},
       {:cowboy, "~> 1.0"},
@@ -36,7 +36,7 @@ defmodule DockerApiProxy.Mixfile do
       {:uuid, "~> 1.0" },
       {:exprof, "~> 0.2" },
       {:rebar3_hex, "~> 2.5"},
-      {:docker_api, path: "/home/bradleyd/Projects/docker_api"}
+      {:docker_api,  git: "https://github.com/bradleyd/docker_api.git"}
     ]   
   end
 end
